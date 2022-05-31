@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Scanner;
@@ -33,21 +34,19 @@ public class DPoPJWTGenerator {
 
     public static void main(String[] args) throws JOSEException, ParseException, IOException {
 
-        File jwkJSONFile = new File("/home/chamath/IS/gateway/dpop/jwt-gen/rsa_key.json");
+        File jwkJSONFile = new File("../dpop-client/rsa_key.json");
         String jwkJSONString = FileUtils.readFileToString(jwkJSONFile, StandardCharset.UTF_8);
 
         RSAKey rsaJWK = RSAKey.parse(jwkJSONString);
-
         RSAKey rsaPublicJWK = rsaJWK.toPublicJWK();
-
         JWSSigner signer = new RSASSASigner(rsaJWK);
 
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter profile - token EP(0), resource EP(1): ");
         int profile = sc.nextInt();
 
-        JWTClaimsSet.Builder jwtClaimSetBuilder = new JWTClaimsSet.Builder();
-        jwtClaimSetBuilder.jwtID(UUID.randomUUID().toString())
+        JWTClaimsSet.Builder jwtClaimSetBuilder = new JWTClaimsSet.Builder()
+                .jwtID(UUID.randomUUID().toString())
                 .issueTime(new Date(new Date().getTime()));
 
         switch (profile) {
@@ -59,7 +58,6 @@ public class DPoPJWTGenerator {
                 jwtClaimSetBuilder.claim("htm", JWT_HTM)
                         .claim("htu", JWT_HTU);
         }
-
         JWTClaimsSet claimsSet = jwtClaimSetBuilder.build();
 
         JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
